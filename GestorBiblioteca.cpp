@@ -1,12 +1,17 @@
 #include "GestorBiblioteca.h"
+#include <cstddef>
+#include <cstdio>
 #include <ios>
 #include <iostream>
 #include <limits>
 #include <stdexcept>
+#include <fstream>
+#include <string>
+#include "Libro.h"
 
 using namespace std;
 
-void GestorBilbioteca::bienvenidaInicial(){
+void GestorBiblioteca::bienvenidaInicial(){
     cout<<"--------------------------"<<endl;
     cout<<"|                        |"<<endl;
     cout<<"|    BIENVENIDO A LA     |"<<endl;
@@ -16,7 +21,7 @@ void GestorBilbioteca::bienvenidaInicial(){
     menuJuego();
 }
 
-void GestorBilbioteca::menuJuego(){
+void GestorBiblioteca::menuJuego(){
     int opcion = 0;
 
     do{
@@ -47,7 +52,7 @@ void GestorBilbioteca::menuJuego(){
     realizarAccion(opcion);
 }
 
-void GestorBilbioteca::menuFinAccion(){
+void GestorBiblioteca::menuFinAccion(){
     int opcion = 0;
 
     do{
@@ -76,14 +81,15 @@ void GestorBilbioteca::menuFinAccion(){
     }
 }
 
-void GestorBilbioteca::realizarAccion(int& opcion){
+void GestorBiblioteca::realizarAccion(int& opcion){
     switch (opcion) {
         case 1: 
             cout<<"Agregando libro"<<endl;
             menuFinAccion();
             break;
         case 2:
-            cout<<"Cargando archivo"<<endl;
+            leerArchivo();
+            listaLibros.imprimirLista();
             menuFinAccion();
             break;
         case 3:
@@ -109,4 +115,105 @@ void GestorBilbioteca::realizarAccion(int& opcion){
         case 8:
             break;
     }
+}
+
+Libro* GestorBiblioteca::crearLibro(string linea) {
+    size_t posicion = 0;
+    string atributo;
+    string campos[5];
+    int indice = 0;
+
+    auto quitarComillas = [](string &s) {
+        if (!s.empty() && s.front() == '"' && s.back() == '"') {
+            s = s.substr(1, s.size() - 2);
+        }
+    };
+
+    while ((posicion = linea.find(',')) != string::npos && indice < 5) {
+        atributo = linea.substr(0, posicion);
+        linea.erase(0, posicion + 1);
+
+        if (atributo.empty() || atributo.front() != '"' || atributo.back() != '"') {
+            return nullptr; // formato inválido
+        }
+
+        quitarComillas(atributo);
+        campos[indice++] = atributo;
+    }
+
+    if (linea.empty() || linea.front() != '"' || linea.back() != '"') {
+        return nullptr;
+    }
+    quitarComillas(linea);
+    if (indice < 5) {
+        campos[indice++] = linea;
+    }
+
+    if (indice != 5) {
+        return nullptr;
+    }
+
+    string titulo, isbn, genero, autor;
+    int anio = 0;
+
+    try {
+        titulo = campos[0];
+        isbn   = campos[1];
+        genero = campos[2];
+        anio   = stoi(campos[3]); 
+        autor  = campos[4];
+    } catch (...) {
+        return nullptr; 
+    }
+
+    if (validarISBN(isbn)) {
+        Libro* libro = new Libro();
+        libro->setTitulo(titulo);
+        libro->setISBN(isbn);
+        libro->setGenero(genero);
+        libro->setAnio(anio);
+        libro->setAutor(autor);
+        return libro;
+    }
+
+    return nullptr;
+}
+
+
+bool GestorBiblioteca::validarISBN(string isbn){
+    return listaLibros.buscarPorIsbn(isbn) == nullptr;
+}
+
+
+void GestorBiblioteca::leerArchivo(){
+    cout<<"---Hora de cargar el archivo---"<<endl;
+    bool valido = false;
+    string nombre;
+    while (!valido) {
+        cout<<"Ingresa el nombre del archivo (debe finalizar con 'csv.'): "<<endl;
+        cin>> nombre;
+
+        if (nombre.size()<4||nombre.substr(nombre.size()-4)!=".csv") {
+            cout<<"ERROR: el archivo debe tener extension '.csv' "<<endl;
+            continue;
+        }
+        ifstream archivo(nombre);
+        if(archivo.fail()){
+            cout<<"ERROR: archivo no valido o no encontrado"<<endl;
+
+        }else{
+            valido = true;
+            cout<<"EXITO: Se cargo correctamente el archivo"<<endl;
+            string linea;
+            while (getline(archivo, linea)) {
+                cargarLibros(crearLibro(linea));
+            }
+            archivo.close();
+        }
+
+    }
+}
+
+void GestorBiblioteca::cargarLibros(Libro* libro){
+    listaLibros.agregarLibro(libro);
 }

@@ -5,7 +5,7 @@ CXX = g++
 CXXFLAGS = -Wall -std=c++11
 
 # Archivos fuente y objetos
-SRC = main.cpp GestorBiblioteca.cpp
+SRC = main.cpp GestorBiblioteca.cpp ListaLibro.cpp
 OBJ = $(SRC:.cpp=.o)
 
 # Nombre del ejecutable

@@ -1,7 +1,7 @@
 #include "GestorBiblioteca.h"
 
 int main(){
-    GestorBilbioteca gs = GestorBilbioteca();
+    GestorBiblioteca gs = GestorBiblioteca();
     gs.bienvenidaInicial();
 
     return 0;
