@@ -9,7 +9,7 @@ class ListaLibro{
     public:
         ListaLibro();
         void agregarLibro(Libro* libro);
-        void eliminarLibro(string isbn);
+        void eliminarLibro(string titulo);
         void imprimirLista();
         Libro* buscarPorIsbn(string isbn);
         Libro* buscarPorTitulo(string titulo);

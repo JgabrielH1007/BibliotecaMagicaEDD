@@ -25,20 +25,20 @@ void ListaLibro::agregarLibro(Libro* libro) {
     tamanio++;
 }
 
-void ListaLibro::eliminarLibro(string isbn) {
+void ListaLibro::eliminarLibro(string titulo) {
     if (estaVacia()) {
         cout << "La lista está vacía." << endl;
         return;
     }
     NodoLista* actual = inicio;
     NodoLista* anterior = nullptr;
-    while (actual != nullptr && actual->libro->getISBN() != isbn) {
+    while (actual != nullptr && actual->libro->getTitulo() != titulo) {
         anterior = actual;
         actual = actual->siguiente;
     }
 
     if (actual == nullptr) {
-        cout << "Libro con ISBN " << isbn << " no encontrado." << endl;
+        cout << "Libro con titulo " << titulo << " no encontrado." << endl;
         return;
     }
 
@@ -52,7 +52,7 @@ void ListaLibro::eliminarLibro(string isbn) {
     delete actual;
     tamanio--;
 
-    cout << "Libro con ISBN " << isbn << " eliminado correctamente." << endl;
+    cout << "Libro con ISBN " << titulo << " eliminado correctamente." << endl;
 }
 
 void ListaLibro::imprimirLista() {

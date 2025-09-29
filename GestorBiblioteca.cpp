@@ -8,7 +8,7 @@
 #include <fstream>
 #include <string>
 #include "Libro.h"
-
+#include "ArbolAVL.h"
 using namespace std;
 
 void GestorBiblioteca::bienvenidaInicial(){
@@ -18,64 +18,36 @@ void GestorBiblioteca::bienvenidaInicial(){
     cout<<"|   BIBLIOTECA MAGICA    |"<<endl;
     cout<<"|                        |"<<endl;
     cout<<"--------------------------"<<endl;
-    menuJuego();
+    menuBiblioteca();
 }
 
-void GestorBiblioteca::menuJuego(){
+void GestorBiblioteca::menuBiblioteca(){
     int opcion = 0;
-
-    do{
-        cout<<"____________________________________________"<<endl;
-        cout<<"|  ¿QUE DESEA REALIZAR EN LA BIBLIOTECA?   |"<<endl;
-        cout<<"|      1.        Agregar libro             |"<<endl;
-        cout<<"|      2.     Cargar archivo csv           |"<<endl;
-        cout<<"|      3.      Realizar busqueda           |"<<endl;
-        cout<<"|      4.       Eliminar libro             |"<<endl;
-        cout<<"|      5.        Listar libros             |"<<endl;
-        cout<<"|      6. Comparar tiempo de busquedas     |"<<endl;
-        cout<<"|      7. Visulizar arboles utilizados     |"<<endl;
-        cout<<"|      8.            Salir                 |"<<endl;
-        cout<<"|__________________________________________|"<<endl;
-        try{
-            cout<<"Ingresar numero de opcion que desea realizar: ";
-            cin>>opcion;
-            if(cin.fail()){
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(),'\n');
-                throw invalid_argument("Entrada realizada no valida, intente de nuevo.");
-            }
-            if (opcion < 1 || opcion >8) {throw out_of_range("Entrada fuera de rango, intente de nuevo...");}
-        }catch(const invalid_argument& e){cout<<"ERROR: "<<e.what()<<endl;}
-        catch(const out_of_range& e){cout<<"ERROR: "<<e.what()<<endl;}
-        
-    }while(cin.fail()||opcion < 1 || opcion >8);
+    cout<<" __________________________________________ "<<endl;
+    cout<<"|  ¿QUE DESEA REALIZAR EN LA BIBLIOTECA?   |"<<endl;
+    cout<<"|      1.        Agregar libro             |"<<endl;
+    cout<<"|      2.     Cargar archivo csv           |"<<endl;
+    cout<<"|      3.      Realizar busqueda           |"<<endl;
+    cout<<"|      4.       Eliminar libro             |"<<endl;
+    cout<<"|      5.        Listar libros             |"<<endl;
+    cout<<"|      6. Comparar tiempo de busquedas     |"<<endl;
+    cout<<"|      7. Visulizar arboles utilizados     |"<<endl;
+    cout<<"|      8.            Salir                 |"<<endl;
+    cout<<"|__________________________________________|"<<endl;
+    opcion = validarOpcion(1,8);
     realizarAccion(opcion);
 }
 
 void GestorBiblioteca::menuFinAccion(){
     int opcion = 0;
-
-    do{
-        cout<<"____________________________________________"<<endl;
-        cout<<"|         ¿QUE DESEA REALIZAR AHORA?       |"<<endl;
-        cout<<"|      1.   Volver a menu principal        |"<<endl;
-        cout<<"|      2.           Salir                  |"<<endl;
-        cout<<"|__________________________________________|"<<endl;
-        try{
-            cout<<"Ingresar numero de opcion que desea realizar: ";
-            cin>>opcion;
-            if(cin.fail()){
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(),'\n');
-                throw invalid_argument("Entrada realizada no valida, intente de nuevo.");
-            }
-            if (opcion < 1 || opcion >2) {throw out_of_range("Entrada fuera de rango, intente de nuevo...");}
-        }catch(const invalid_argument& e){cout<<"ERROR: "<<e.what()<<endl;}
-        catch(const out_of_range& e){cout<<"ERROR: "<<e.what()<<endl;}
-        
-    }while(cin.fail()||opcion < 1 || opcion >2);
+    cout<<" __________________________________________ "<<endl;
+    cout<<"|         ¿QUE DESEA REALIZAR AHORA?       |"<<endl;
+    cout<<"|      1.   Volver a menu principal        |"<<endl;
+    cout<<"|      2.           Salir                  |"<<endl;
+    cout<<"|__________________________________________|"<<endl;
+    opcion = validarOpcion(1, 2);
     if(opcion == 1){
-        menuJuego();
+        menuBiblioteca();
     }else{
 
     }
@@ -89,7 +61,6 @@ void GestorBiblioteca::realizarAccion(int& opcion){
             break;
         case 2:
             leerArchivo();
-            listaLibros.imprimirLista();
             menuFinAccion();
             break;
         case 3:
@@ -97,11 +68,11 @@ void GestorBiblioteca::realizarAccion(int& opcion){
             menuFinAccion();
             break;
         case 4:
-            cout<<"Eliminando libro"<<endl;
+            eliminarLibro();
             menuFinAccion();
             break;
         case 5:
-            cout<<"Listando libros"<<endl;
+            mostrarLibros();
             menuFinAccion();
             break;
         case 6:
@@ -109,12 +80,22 @@ void GestorBiblioteca::realizarAccion(int& opcion){
             menuFinAccion();
             break;
         case 7:
-            cout<<"Viendo arboles"<<endl;
+            generarGraphvizArboles();
             menuFinAccion();
             break;
         case 8:
             break;
     }
+}
+
+long long int GestorBiblioteca::convertirISBN(string isbn) {
+    string isbnSinGuiones;
+    for (char c : isbn) {
+        if (c != '-') {
+            isbnSinGuiones += c;
+        }
+    }
+    return stoll(isbnSinGuiones); 
 }
 
 Libro* GestorBiblioteca::crearLibro(string linea) {
@@ -134,9 +115,8 @@ Libro* GestorBiblioteca::crearLibro(string linea) {
         linea.erase(0, posicion + 1);
 
         if (atributo.empty() || atributo.front() != '"' || atributo.back() != '"') {
-            return nullptr; // formato inválido
+            return nullptr; 
         }
-
         quitarComillas(atributo);
         campos[indice++] = atributo;
     }
@@ -145,6 +125,7 @@ Libro* GestorBiblioteca::crearLibro(string linea) {
         return nullptr;
     }
     quitarComillas(linea);
+
     if (indice < 5) {
         campos[indice++] = linea;
     }
@@ -152,7 +133,7 @@ Libro* GestorBiblioteca::crearLibro(string linea) {
     if (indice != 5) {
         return nullptr;
     }
-
+    
     string titulo, isbn, genero, autor;
     int anio = 0;
 
@@ -170,6 +151,7 @@ Libro* GestorBiblioteca::crearLibro(string linea) {
         Libro* libro = new Libro();
         libro->setTitulo(titulo);
         libro->setISBN(isbn);
+        libro->setISBNNum(convertirISBN(isbn));
         libro->setGenero(genero);
         libro->setAnio(anio);
         libro->setAutor(autor);
@@ -210,10 +192,174 @@ void GestorBiblioteca::leerArchivo(){
             }
             archivo.close();
         }
-
     }
 }
 
 void GestorBiblioteca::cargarLibros(Libro* libro){
+    if(!libro) {
+        return;
+    }
     listaLibros.agregarLibro(libro);
+    arbolISBN.insertarPorIsbn(libro->getISBNNum(), libro);
+    arbolTitulo.insertarPorTitulo(libro->getTitulo(), libro);
+    arbolGenero.insertar(libro);
+}
+
+void GestorBiblioteca::buscarLibro(){
+    int opcion;
+    cout<<"---Hora de buscar un libro---"<<endl;
+    cout<<" __________________________________________"<<endl;
+    cout<<"|       1     Buscar por titulo            |"<<endl;
+    cout<<"|       2.     Buscar por ISBN             |"<<endl;
+    cout<<"|       3.    Buscar por genero            |"<<endl;
+    cout<<"|       4. Buscar por rango de fecha       |"<<endl;
+    cout<<"|__________________________________________|"<<endl;
+        
+    opcion = validarOpcion(1,2);
+
+    if(opcion == 1){
+        int opcion1;
+            cout<<" __________________________________________"<<endl;
+            cout<<"|        1   Busqueda secuencial           |"<<endl;
+            cout<<"|        2.    Busqueda binaria            |"<<endl;
+            cout<<"|__________________________________________|"<<endl;
+        opcion1 = validarOpcion(1, 2);  
+        if (opcion1 == 1) {
+            string titulo;
+            cout << "Ingrese el título del libro a buscar: " << endl;
+            std::getline(cin >> std::ws, titulo); 
+            listaLibros.buscarPorTitulo(titulo);
+        } else if (opcion1 == 2) {
+            string titulo;
+            cout << "Ingrese el título del libro a buscar: " << endl;
+            std::getline(cin >> std::ws, titulo);
+            NodoAVL* nodoTitulo = arbolTitulo.buscarPorTitulo(titulo);
+            if (nodoTitulo != nullptr) {
+                cout << "Libro encontrado:" << endl;
+                nodoTitulo->getLibro()->imprimirLibro();
+            } else {
+                cout << "No se encontró el libro con título: " << titulo << endl;
+            }
+        }
+    }else if(opcion == 2){
+        int opcion2;
+            cout<<" __________________________________________"<<endl;
+            cout<<"|        1   Busqueda secuencial           |"<<endl;
+            cout<<"|        2.    Busqueda binaria            |"<<endl;
+            cout<<"|__________________________________________|"<<endl;
+        opcion2 = validarOpcion(1, 2);  
+        if (opcion2 == 1) {
+            string isbn;
+            cout << "Ingrese el ISBN del libro a buscar: " << endl;
+            std::getline(cin >> std::ws, isbn); 
+            listaLibros.buscarPorIsbn(isbn);
+        } else if (opcion2 == 2) {
+            string isbn;
+            cout << "Ingrese el ISBN del libro a buscar: " << endl;
+            std::getline(cin >> std::ws, isbn);
+            long long int isbnNum = convertirISBN(isbn);
+            NodoAVL* nodoIsbn = arbolISBN.buscarPorIsbn(isbnNum);
+            if (nodoIsbn != nullptr) {
+                cout << "Libro encontrado:" << endl;
+                nodoIsbn->getLibro()->imprimirLibro();
+            } else {
+                cout << "No se encontró el libro con ISBN: " << isbn << endl;
+            }
+        } else if(opcion == 3){
+            buscarArbolB();
+        }else{
+            cout<<"Busqueda por rango de fecha no implementada aun"<<endl;
+        }
+
+    }
+}
+
+int GestorBiblioteca::validarOpcion(int minimo, int maximo) {
+    int opcion;
+    bool valido = false;
+    do {
+        try {
+            cout << "Ingresar numero de la busqueda que desea realizar: ";
+            cin >> opcion;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                throw invalid_argument("Entrada no valida, intente de nuevo.");
+            }
+            if (opcion < minimo || opcion > maximo) {
+                throw out_of_range("Entrada fuera de rango, intente de nuevo...");
+            }
+            valido = true; 
+        } catch (const invalid_argument& e) {
+            cout << "ERROR: " << e.what() << endl;
+        } catch (const out_of_range& e) {
+            cout << "ERROR: " << e.what() << endl;
+        }
+    } while (!valido);
+
+    return opcion;
+}
+
+void GestorBiblioteca::mostrarLibros(){
+    int opcion;
+    cout<<"---Hora de mostrar los libros---"<<endl;
+    cout<<" __________________________________________"<<endl;
+    cout<<"|     1. Mostrar arbolAVL por titulo       |"<<endl;
+    cout<<"|     2.  Mostrar arbolAVL por isbn        |"<<endl;
+    cout<<"|     3.   Mostrar lista de libros         |"<<endl;
+    cout<<"|     4.  Mostrar arbolB de libros         |"<<endl;
+    cout<<"|__________________________________________|"<<endl;
+
+    opcion = validarOpcion(1,4);
+    if(opcion == 1){
+        arbolTitulo.inorden();
+    }else if(opcion == 2){
+        arbolISBN.inorden();
+    }else if(opcion == 3){
+        listaLibros.imprimirLista();
+    }else{
+        arbolGenero.mostrarlo();
+    }
+}
+
+
+void GestorBiblioteca::eliminarLibro(){
+    cout << "---Hora de eliminar un libro---" << endl;
+    string titulo;
+    cout << "Ingrese el título del libro a eliminar: " << endl;
+    std::getline(cin >> std::ws, titulo); 
+
+    NodoAVL* nodoTitulo = arbolTitulo.buscarPorTitulo(titulo);
+    if (nodoTitulo == nullptr) {
+        cout << "No se encontró el libro con título: " << titulo << endl;
+        return;
+    }
+    arbolISBN.eliminar(titulo);
+    arbolTitulo.eliminar(titulo);
+    listaLibros.eliminarLibro(titulo);
+    cout << "Libro con título \"" << titulo << "\" eliminado correctamente." << endl;
+}
+
+void GestorBiblioteca::generarGraphvizArboles(){
+    cout << "---Generando archivos Graphviz de los árboles AVL---" << endl;
+    arbolISBN.generarGraphviz("arbolISBN.dot", "arbolISBN.png");
+    arbolTitulo.generarGraphviz("arbolTitulo.dot", "arbolTitulo.png");
+    arbolGenero.generarGraphviz("arbolGenero.dot", "arbolGenero.png");
+    cout << "Archivos generados: arbolISBN.dot y arbolTitulo.dot" << endl;
+}
+
+void GestorBiblioteca::buscarArbolB(){
+    cout << "---Hora de buscar un libro por genero en el arbol B---" << endl;
+    string genero;
+    cout << "Ingrese el genero del libro a buscar: " << endl;
+    std::getline(cin >> std::ws, genero); 
+
+    ListaLibro encontrados;
+    Libro* primerEncontrado = arbolGenero.buscar(genero, encontrados);
+    if (primerEncontrado == nullptr) {
+        cout << "No se encontraron libros con el género: " << genero << endl;
+        return;
+    }
+    cout << "Libros encontrados con el género \"" << genero << "\":" << endl;
+    encontrados.imprimirLista();
 }

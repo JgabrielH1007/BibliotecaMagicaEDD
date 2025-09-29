@@ -7,11 +7,12 @@ using namespace std;
 class Libro{
 
     private:
-        string titulo;
-        string isbn;
-        string genero;
-        int anio;
-        string autor;
+        string titulo="";
+        string isbn="";
+        long long int isbnNum=0;
+        string genero="";
+        int anio = 0;
+        string autor ="";
     public:
         void setTitulo(string titulo){
             this->titulo = titulo;
@@ -25,6 +26,14 @@ class Libro{
         string getISBN(){
             return isbn;
         }
+
+        long long int getISBNNum(){
+            return isbnNum;
+        }
+        void setISBNNum(long long int isbnNum){
+            this->isbnNum = isbnNum;
+        }
+
         void setGenero(string genero){
             this->genero = genero;
         }
@@ -42,6 +51,15 @@ class Libro{
         }
         string getAutor(){
             return autor;
+        }
+
+        void imprimirLibro(){
+            cout << "Título: " << titulo<<"\n"
+             << " | ISBN: " << isbn<<"\n"
+             << " | Género: " << genero<<"\n"
+             << " | Año: " << anio<<"\n"
+             << " | Autor: " << autor<<"\n"
+             << endl;
         }
         
 
