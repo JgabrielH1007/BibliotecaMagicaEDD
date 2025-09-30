@@ -171,14 +171,14 @@ NodoAVL* ArbolAVL::buscarPorIsbnRecursivo(NodoAVL* nodo, long long int isbn){
     return buscarPorIsbnRecursivo(nodo->getDerecho(), isbn);
 }
 
-NodoAVL* ArbolAVL::eliminarRecursivo(NodoAVL* nodo, string titulo){
+NodoAVL* ArbolAVL::eliminarRecursivoTitulo(NodoAVL* nodo, string titulo){
     if(nodo == nullptr){
         return nodo;
     }
     if(titulo < nodo->getLibro()->getTitulo()){
-        nodo->setIzquierdo(eliminarRecursivo(nodo->getIzquierdo(), titulo));
+        nodo->setIzquierdo(eliminarRecursivoTitulo(nodo->getIzquierdo(), titulo));
     }else if(titulo > nodo->getLibro()->getTitulo()){
-        nodo->setDerecho(eliminarRecursivo(nodo->getDerecho(), titulo));
+        nodo->setDerecho(eliminarRecursivoTitulo(nodo->getDerecho(), titulo));
     }else{
         if (nodo->getIzquierdo() == nullptr || nodo->getDerecho() == nullptr) {
             NodoAVL* temp = nodo->getIzquierdo() ? nodo->getIzquierdo() : nodo->getDerecho();
@@ -196,7 +196,58 @@ NodoAVL* ArbolAVL::eliminarRecursivo(NodoAVL* nodo, string titulo){
                 temp = temp->getIzquierdo();
             }
             nodo->setLibro(temp->getLibro());
-            nodo->setDerecho(eliminarRecursivo(nodo->getDerecho(), temp->getLibro()->getTitulo()));
+            nodo->setDerecho(eliminarRecursivoTitulo(nodo->getDerecho(), temp->getLibro()->getTitulo()));
+        }
+    }
+
+    if(nodo == nullptr){
+        return nodo;
+    }
+
+    actualizarAlturaYFactor(nodo);
+
+    if(nodo->getFactorEquilibrio() > 1 && obtenerFactorEquilibrio(nodo->getIzquierdo()) >= 0){
+        return rotacionII(nodo);
+    }
+    if(nodo->getFactorEquilibrio() < -1 && obtenerFactorEquilibrio(nodo->getDerecho()) <= 0){
+        return rotacionDD(nodo);
+    }
+    if(nodo->getFactorEquilibrio() > 1 && obtenerFactorEquilibrio(nodo->getIzquierdo()) < 0){
+        return rotacionID(nodo);
+    }
+    if(nodo->getFactorEquilibrio() < -1 && obtenerFactorEquilibrio(nodo->getDerecho()) > 0){
+        return rotacionDI(nodo);
+    }
+
+    return nodo;
+}
+
+NodoAVL* ArbolAVL::eliminarRecursivoIsbn(NodoAVL* nodo, long long int isbn){
+    if(nodo == nullptr){
+        return nodo;
+    }
+    if(isbn < nodo->getLibro()->getISBNNum()){
+        nodo->setIzquierdo(eliminarRecursivoIsbn(nodo->getIzquierdo(), isbn));
+    }else if(isbn > nodo->getLibro()->getISBNNum()){
+        nodo->setDerecho(eliminarRecursivoIsbn(nodo->getDerecho(), isbn));
+    }else{
+        if (nodo->getIzquierdo() == nullptr || nodo->getDerecho() == nullptr) {
+            NodoAVL* temp = nodo->getIzquierdo() ? nodo->getIzquierdo() : nodo->getDerecho();
+            if (temp == nullptr) {
+                delete nodo;
+                nodo = nullptr;
+            } else {
+                NodoAVL* viejo = nodo;
+                nodo = temp;
+                delete viejo;
+            }
+        }else{
+            NodoAVL* temp = nodo->getDerecho();
+            while(temp->getIzquierdo() != nullptr){
+                temp = temp->getIzquierdo();
+            }
+            nodo->setLibro(temp->getLibro());
+            nodo->setDerecho(eliminarRecursivoIsbn(nodo->getDerecho(), temp->getLibro()->getISBNNum()));
         }
     }
 
@@ -228,9 +279,14 @@ NodoAVL* ArbolAVL::buscarPorTitulo(string titulo){
 NodoAVL* ArbolAVL::buscarPorIsbn(long long int isbn){
     return buscarPorIsbnRecursivo(raiz, isbn);
 }
-void ArbolAVL::eliminar(string titulo){
-    raiz = eliminarRecursivo(raiz, titulo);
+void ArbolAVL::eliminarTitulo(string titulo){
+    raiz = eliminarRecursivoTitulo(raiz, titulo);
 }
+
+void ArbolAVL::eliminarIsbn(long long int isbn){
+    raiz = eliminarRecursivoIsbn(raiz, isbn);
+}
+
 void ArbolAVL::inordenRecursivo(NodoAVL* nodo){
     if(nodo != nullptr){
         inordenRecursivo(nodo->getIzquierdo());

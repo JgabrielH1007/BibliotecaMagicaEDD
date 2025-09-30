@@ -4,6 +4,7 @@
 #include "ListaLibro.h"
 #include "ArbolAVL.h"
 #include "ArbolB.h"
+#include "ArbolB+.h"
 #include <string>
 
 class GestorBiblioteca{
@@ -12,6 +13,7 @@ class GestorBiblioteca{
         ArbolAVL arbolISBN;
         ArbolAVL arbolTitulo;
         ArbolB arbolGenero{3};
+        ArbolBPlus arbolAnio{3};
     public: 
         void bienvenidaInicial();
         void menuBiblioteca();
@@ -29,6 +31,8 @@ class GestorBiblioteca{
         void generarGraphvizArboles();
         void buscarArbolB();
         void compararTiempos();
+        void cargarLibroManual();
+        void buscarPorRangoAnio();
 };
 
 #endif 

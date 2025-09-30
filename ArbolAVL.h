@@ -3,6 +3,7 @@
 #include "Libro.h"
 #include "NodoAVL.h"
 #include <iostream>
+#include <chrono>
 using namespace std;
 
 class ArbolAVL{
@@ -19,7 +20,8 @@ class ArbolAVL{
         NodoAVL* insertarRecursivoPorIsbn(NodoAVL* nodo, long long int isbn, Libro* libro);
         NodoAVL* buscarPorTituloRecursivo(NodoAVL* nodo, string titulo);
         NodoAVL* buscarPorIsbnRecursivo(NodoAVL* nodo, long long int isbn);
-        NodoAVL* eliminarRecursivo(NodoAVL* nodo, string titulo);
+        NodoAVL* eliminarRecursivoTitulo(NodoAVL* nodo, string titulo);
+        NodoAVL* eliminarRecursivoIsbn(NodoAVL* nodo, long long int isbn);
         void inordenRecursivo(NodoAVL* nodo);
         void generarGraphvizRecursivo(NodoAVL* nodo, ofstream& archivo);
     public:
@@ -28,7 +30,8 @@ class ArbolAVL{
         void insertarPorTitulo(string titulo, Libro* libro);
         NodoAVL* buscarPorTitulo(string titulo);
         NodoAVL* buscarPorIsbn(long long int isbn);
-        void eliminar(string titulo);
+        void eliminarTitulo(string titulo);
+        void eliminarIsbn(long long int isbn);
         void inorden();
         void generarGraphviz(const string& nombreArchivo, const string& nombreImagen);
 };

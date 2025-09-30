@@ -64,7 +64,7 @@ void GestorBiblioteca::realizarAccion(int& opcion){
             menuFinAccion();
             break;
         case 3:
-            cout<<"Realizando busqueda"<<endl;
+            buscarLibro();
             menuFinAccion();
             break;
         case 4:
@@ -203,6 +203,7 @@ void GestorBiblioteca::cargarLibros(Libro* libro){
     arbolISBN.insertarPorIsbn(libro->getISBNNum(), libro);
     arbolTitulo.insertarPorTitulo(libro->getTitulo(), libro);
     arbolGenero.insertar(libro);
+    arbolAnio.insertar(libro);
 }
 
 void GestorBiblioteca::buscarLibro(){
@@ -215,7 +216,7 @@ void GestorBiblioteca::buscarLibro(){
     cout<<"|       4. Buscar por rango de fecha       |"<<endl;
     cout<<"|__________________________________________|"<<endl;
         
-    opcion = validarOpcion(1,2);
+    opcion = validarOpcion(1,4);
 
     if(opcion == 1){
         int opcion1;
@@ -265,12 +266,11 @@ void GestorBiblioteca::buscarLibro(){
             } else {
                 cout << "No se encontró el libro con ISBN: " << isbn << endl;
             }
-        } else if(opcion == 3){
-            buscarArbolB();
-        }else{
-            cout<<"Busqueda por rango de fecha no implementada aun"<<endl;
         }
-
+    } else if(opcion == 3){
+        buscarArbolB();
+    }else{
+        buscarPorRangoAnio();
     }
 }
 
@@ -308,35 +308,42 @@ void GestorBiblioteca::mostrarLibros(){
     cout<<"|     2.  Mostrar arbolAVL por isbn        |"<<endl;
     cout<<"|     3.   Mostrar lista de libros         |"<<endl;
     cout<<"|     4.  Mostrar arbolB de libros         |"<<endl;
+    cout<<"|     5.  Mostrar arbolB+ de libros        |"<<endl;
     cout<<"|__________________________________________|"<<endl;
 
-    opcion = validarOpcion(1,4);
+    opcion = validarOpcion(1,5);
     if(opcion == 1){
         arbolTitulo.inorden();
     }else if(opcion == 2){
         arbolISBN.inorden();
     }else if(opcion == 3){
         listaLibros.imprimirLista();
-    }else{
+    }else if(opcion == 4){
         arbolGenero.mostrarlo();
+    }else {
+        arbolAnio.mostrar();
     }
 }
 
 
-void GestorBiblioteca::eliminarLibro(){
+void GestorBiblioteca::eliminarLibro() {
     cout << "---Hora de eliminar un libro---" << endl;
     string titulo;
     cout << "Ingrese el título del libro a eliminar: " << endl;
-    std::getline(cin >> std::ws, titulo); 
+    std::getline(cin >> std::ws, titulo);
 
     NodoAVL* nodoTitulo = arbolTitulo.buscarPorTitulo(titulo);
-    if (nodoTitulo == nullptr) {
+    if (!nodoTitulo) {
         cout << "No se encontró el libro con título: " << titulo << endl;
         return;
     }
-    arbolISBN.eliminar(titulo);
-    arbolTitulo.eliminar(titulo);
+    Libro* libro = nodoTitulo->getLibro(); 
+    arbolISBN.eliminarIsbn(libro->getISBNNum());
+    arbolTitulo.eliminarTitulo(titulo);     
+    arbolGenero.eliminar(libro->getGenero());
+    arbolAnio.eliminarPorTitulo(titulo);   
     listaLibros.eliminarLibro(titulo);
+
     cout << "Libro con título \"" << titulo << "\" eliminado correctamente." << endl;
 }
 
@@ -345,6 +352,7 @@ void GestorBiblioteca::generarGraphvizArboles(){
     arbolISBN.generarGraphviz("arbolISBN.dot", "arbolISBN.png");
     arbolTitulo.generarGraphviz("arbolTitulo.dot", "arbolTitulo.png");
     arbolGenero.generarGraphviz("arbolGenero.dot", "arbolGenero.png");
+    arbolAnio.generarGraphviz("arbolAnio.dot", "arbolAnio.png");
     cout << "Archivos generados: arbolISBN.dot y arbolTitulo.dot" << endl;
 }
 
@@ -361,5 +369,23 @@ void GestorBiblioteca::buscarArbolB(){
         return;
     }
     cout << "Libros encontrados con el género \"" << genero << "\":" << endl;
+    encontrados.imprimirLista();
+}
+
+void GestorBiblioteca::buscarPorRangoAnio(){
+    cout << "---Hora de buscar libros por rango de año en el arbol B+---" << endl;
+    int anioInicial, anioFinal;
+    cout << "Ingrese el año inicial: " << endl;
+    cin >> anioInicial; 
+    cout << "Ingrese el año final: " << endl;
+    cin >> anioFinal;
+
+    ListaLibro encontrados;
+    Libro* primerEncontrado = arbolAnio.buscarPorRangoAnio(anioInicial, anioFinal, encontrados);
+    if (primerEncontrado == nullptr) {
+        cout << "No se encontraron libros del año: " << anioInicial<<" al año final: "<<anioFinal << endl;
+        return;
+    }
+    cout << "Libros encontrados del año " << anioInicial << " al año " << anioFinal << ":" << endl;
     encontrados.imprimirLista();
 }

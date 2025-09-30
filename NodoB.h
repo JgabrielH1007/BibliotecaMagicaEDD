@@ -13,9 +13,9 @@ class NodoB {
         vector<NodoB*> hijos;
         NodoB(bool esHoja = true) : esHoja(esHoja) {}
 
-        int encontrarIndice(const string& titulo) {
+        int encontrarIndice(const string& genero) {
             int idx = 0;
-            while (idx < (int)claves.size() && claves[idx]->getTitulo() < titulo) {
+            while (idx < (int)claves.size() && claves[idx]->getGenero() < genero) {
                 idx++;
             }
             return idx;

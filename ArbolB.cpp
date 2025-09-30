@@ -1,4 +1,5 @@
 #include "ArbolB.h"
+#include <cstddef>
 #include <iostream>
 #include <vector>
 #include "NodoB.h"
@@ -49,7 +50,7 @@ void ArbolB::insertarNoLleno(NodoB* nodo, Libro* libro) {
             i--;
         }
         i++;
-        if (nodo->hijos[i]->claves.size() == 2 * t - 1) {
+        if ((int)nodo->hijos[i]->claves.size() == 2 * t - 1) {
             dividirHijo(nodo, i, nodo->hijos[i]);
             if (nodo->claves[i]->getGenero() < libro->getGenero()) {
                 i++;
@@ -64,7 +65,7 @@ void ArbolB::insertar(Libro* libro) {
         raiz = new NodoB(true);
         raiz->claves.push_back(libro);
     } else {
-        if (raiz->claves.size() == 2 * t - 1) {
+        if ((int)raiz->claves.size() == 2 * t - 1) {
             NodoB* nuevaRaiz = new NodoB(false);
             nuevaRaiz->hijos.push_back(raiz);
             dividirHijo(nuevaRaiz, 0, raiz);
@@ -157,12 +158,12 @@ void ArbolB::eliminar(string genero) {
 }
 void ArbolB::eliminar(NodoB* nodo, string genero) {
     int idx = nodo->encontrarIndice(genero);
-    if (idx < nodo->claves.size() && nodo->claves[idx]->getGenero() == genero) {
+    if ((size_t)idx < nodo->claves.size() && nodo->claves[idx]->getGenero() == genero) {
         if (nodo->esHoja) {
             nodo->claves.erase(nodo->claves.begin() + idx);
         } else {
             NodoB* pred = nodo->hijos[idx];
-            if (pred->claves.size() >= t) {
+            if ((int)pred->claves.size() >= t) {
                 while (!pred->esHoja) {
                     pred = pred->hijos.back();
                 }
@@ -171,7 +172,7 @@ void ArbolB::eliminar(NodoB* nodo, string genero) {
                 eliminar(pred, libroPred->getGenero());
             } else {
                 NodoB* succ = nodo->hijos[idx + 1];
-                if (succ->claves.size() >= t) {
+                if ((int)succ->claves.size() >= t) {
                     while (!succ->esHoja) {
                         succ = succ->hijos.front();
                     }
@@ -180,11 +181,11 @@ void ArbolB::eliminar(NodoB* nodo, string genero) {
                     eliminar(succ, libroSucc->getGenero());
                 } else {
                     pred->claves.push_back(nodo->claves[idx]);
-                    for (int i = 0; i < succ->claves.size(); i++) {
+                    for (size_t i = 0; i < succ->claves.size(); i++) {
                         pred->claves.push_back(succ->claves[i]);
                     }
                     if (!pred->esHoja) {
-                        for (int i = 0; i < succ->hijos.size(); i++) {
+                        for (size_t i = 0; i < succ->hijos.size(); i++) {
                             pred->hijos.push_back(succ->hijos[i]);
                         }
                     }
@@ -200,11 +201,11 @@ void ArbolB::eliminar(NodoB* nodo, string genero) {
             cout << "El género " << genero << " no se encontró en el árbol." << endl;
             return;
         }
-        bool debePrestar = (idx == nodo->claves.size()) ? true : false;
-        if (nodo->hijos[idx]->claves.size() < t) {
+        bool debePrestar = ((size_t)idx == nodo->claves.size()) ? true : false;
+        if ((int)nodo->hijos[idx]->claves.size() < t) {
             NodoB* hijoIzq = (idx != 0) ? nodo->hijos[idx - 1] : nullptr;
-            NodoB* hijoDer = (idx != nodo->claves.size()) ? nodo->hijos[idx + 1] : nullptr;
-            if (hijoIzq != nullptr && hijoIzq->claves.size() >= t) {
+            NodoB* hijoDer = ((size_t)idx != nodo->claves.size()) ? nodo->hijos[idx + 1] : nullptr;
+            if (hijoIzq != nullptr && (int)hijoIzq->claves.size() >= t) {
                 nodo->hijos[idx]->claves.insert(nodo->hijos[idx]->claves.begin(), nodo->claves[idx - 1]);
                 nodo->claves[idx - 1] = hijoIzq->claves.back();
                 hijoIzq->claves.pop_back();
@@ -212,7 +213,7 @@ void ArbolB::eliminar(NodoB* nodo, string genero) {
                     nodo->hijos[idx]->hijos.insert(nodo->hijos[idx]->hijos.begin(), hijoIzq->hijos.back());
                     hijoIzq->hijos.pop_back();
                 }
-            } else if (hijoDer != nullptr && hijoDer->claves.size() >= t) {
+            } else if (hijoDer != nullptr && (int)hijoDer->claves.size() >= t) {
                 nodo->hijos[idx]->claves.push_back(nodo->claves[idx]);
                 nodo->claves[idx] = hijoDer->claves.front();
                 hijoDer->claves.erase(hijoDer->claves.begin());
@@ -223,11 +224,11 @@ void ArbolB::eliminar(NodoB* nodo, string genero) {
             } else {
                 if (hijoIzq != nullptr) {
                     hijoIzq->claves.push_back(nodo->claves[idx - 1]);
-                    for (int i = 0; i < nodo->hijos[idx]->claves.size(); i++) {
+                    for (size_t i = 0; i < nodo->hijos[idx]->claves.size(); i++) {
                         hijoIzq->claves.push_back(nodo->hijos[idx]->claves[i]);
                     }
                     if (!hijoIzq->esHoja) {
-                        for (int i = 0; i < nodo->hijos[idx]->hijos.size(); i++) {
+                        for (size_t i = 0; i < nodo->hijos[idx]->hijos.size(); i++) {
                             hijoIzq->hijos.push_back(nodo->hijos[idx]->hijos[i]);
                         }
                     }
@@ -237,11 +238,11 @@ void ArbolB::eliminar(NodoB* nodo, string genero) {
                     idx--;
                 } else if (hijoDer != nullptr) {
                     nodo->hijos[idx]->claves.push_back(nodo->claves[idx]);
-                    for (int i = 0; i < hijoDer->claves.size(); i++) {
+                    for (size_t i = 0; i < hijoDer->claves.size(); i++) {
                         nodo->hijos[idx]->claves.push_back(hijoDer->claves[i]);
                     }
                     if (!nodo->hijos[idx]->esHoja) {
-                        for (int i = 0; i < hijoDer->hijos.size(); i++) {
+                        for (size_t i = 0; i < hijoDer->hijos.size(); i++) {
                             nodo->hijos[idx]->hijos.push_back(hijoDer->hijos[i]);
                         }
                     }
@@ -251,12 +252,13 @@ void ArbolB::eliminar(NodoB* nodo, string genero) {
                 }
             }
         }
-        if (debePrestar && idx > nodo->claves.size()) {
+        if (debePrestar && idx > (int)nodo->claves.size()) {
             idx--;
         }
         eliminar(nodo->hijos[idx], genero);
     }
 }
+
 
 void ArbolB::mostrar(NodoB* nodo, int nivel) {
     if (nodo != nullptr) {
