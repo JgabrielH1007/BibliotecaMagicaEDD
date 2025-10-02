@@ -1,7 +1,7 @@
 digraph G {
     node [shape=box];
-    "Moby Dick" [label="Moby Dick\nISBN: 978-84-9105-088-0"];
-    "Moby Dick" -> "La Iliada";
+    "Orgullo y Prejuicio" [label="Orgullo y Prejuicio\nISBN: 978-84-9105-029-3"];
+    "Orgullo y Prejuicio" -> "La Iliada";
     "La Iliada" [label="La Iliada\nISBN: 978-84-08-00002-8"];
     "La Iliada" -> "La Odisea";
     "La Odisea" [label="La Odisea\nISBN: 978-84-08-00001-1"];
@@ -11,7 +11,7 @@ digraph G {
     "En Busca del Tiempo Perdido" [label="En Busca del Tiempo Perdido\nISBN: 978-84-206-6942-7"];
     "Crimen y Castigo" -> "Los Miserables";
     "Los Miserables" [label="Los Miserables\nISBN: 978-84-9105-021-7"];
-    "Moby Dick" -> "Fahrenheit 451";
+    "Orgullo y Prejuicio" -> "Fahrenheit 451";
     "Fahrenheit 451" [label="Fahrenheit 451\nISBN: 978-84-9759-425-8"];
     "Fahrenheit 451" -> "Ulises";
     "Ulises" [label="Ulises\nISBN: 978-84-9181-125-2"];

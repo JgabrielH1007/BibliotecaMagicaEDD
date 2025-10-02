@@ -1,12 +1,11 @@
 #include "GestorBiblioteca.h"
-#include <cstddef>
-#include <cstdio>
-#include <ios>
 #include <iostream>
 #include <limits>
+#include <ratio>
 #include <stdexcept>
 #include <fstream>
 #include <string>
+#include <chrono>
 #include "Libro.h"
 #include "ArbolAVL.h"
 using namespace std;
@@ -56,7 +55,7 @@ void GestorBiblioteca::menuFinAccion(){
 void GestorBiblioteca::realizarAccion(int& opcion){
     switch (opcion) {
         case 1: 
-            cout<<"Agregando libro"<<endl;
+            cargarLibroManual();
             menuFinAccion();
             break;
         case 2:
@@ -76,7 +75,7 @@ void GestorBiblioteca::realizarAccion(int& opcion){
             menuFinAccion();
             break;
         case 6:
-            cout<<"Comparando busquedas"<<endl;
+            compararTiempos();
             menuFinAccion();
             break;
         case 7:
@@ -162,8 +161,21 @@ Libro* GestorBiblioteca::crearLibro(string linea) {
 }
 
 
-bool GestorBiblioteca::validarISBN(string isbn){
-    return listaLibros.buscarPorIsbn(isbn) == nullptr;
+bool GestorBiblioteca::validarISBN(std::string isbn) {
+    if (isbn.front() == '-' || isbn.back() == '-') {
+        return false;
+    }
+
+    int digitos = 0;
+    for (char c : isbn) {
+        if (std::isdigit(c)) {
+            digitos++;
+        } else if (c != '-') {
+            return false;
+        }
+    }
+
+    return digitos == 13;
 }
 
 
@@ -196,9 +208,15 @@ void GestorBiblioteca::leerArchivo(){
 }
 
 void GestorBiblioteca::cargarLibros(Libro* libro){
-    if(!libro) {
+    if(!libro) return;
+
+    Libro* existente = listaLibros.buscarPorIsbn(libro->getISBN());
+    if (existente) {
+        existente->setNumCopias(existente->getNumCopias() + 1);
+        delete libro; // Elimininando ya que si existe
         return;
     }
+
     listaLibros.agregarLibro(libro);
     arbolISBN.insertarPorIsbn(libro->getISBNNum(), libro);
     arbolTitulo.insertarPorTitulo(libro->getTitulo(), libro);
@@ -206,73 +224,96 @@ void GestorBiblioteca::cargarLibros(Libro* libro){
     arbolAnio.insertar(libro);
 }
 
-void GestorBiblioteca::buscarLibro(){
-    int opcion;
-    cout<<"---Hora de buscar un libro---"<<endl;
-    cout<<" __________________________________________"<<endl;
-    cout<<"|       1     Buscar por titulo            |"<<endl;
-    cout<<"|       2.     Buscar por ISBN             |"<<endl;
-    cout<<"|       3.    Buscar por genero            |"<<endl;
-    cout<<"|       4. Buscar por rango de fecha       |"<<endl;
-    cout<<"|__________________________________________|"<<endl;
-        
-    opcion = validarOpcion(1,4);
 
-    if(opcion == 1){
-        int opcion1;
-            cout<<" __________________________________________"<<endl;
-            cout<<"|        1   Busqueda secuencial           |"<<endl;
-            cout<<"|        2.    Busqueda binaria            |"<<endl;
-            cout<<"|__________________________________________|"<<endl;
-        opcion1 = validarOpcion(1, 2);  
-        if (opcion1 == 1) {
-            string titulo;
-            cout << "Ingrese el título del libro a buscar: " << endl;
-            std::getline(cin >> std::ws, titulo); 
-            listaLibros.buscarPorTitulo(titulo);
-        } else if (opcion1 == 2) {
-            string titulo;
-            cout << "Ingrese el título del libro a buscar: " << endl;
-            std::getline(cin >> std::ws, titulo);
-            NodoAVL* nodoTitulo = arbolTitulo.buscarPorTitulo(titulo);
-            if (nodoTitulo != nullptr) {
-                cout << "Libro encontrado:" << endl;
-                nodoTitulo->getLibro()->imprimirLibro();
+void GestorBiblioteca::buscarLibro() {
+    cout << "---Hora de buscar un libro---" << endl;
+    cout << " __________________________________________" << endl;
+    cout << "|       1     Buscar por titulo            |" << endl;
+    cout << "|       2.    Buscar por ISBN              |" << endl;
+    cout << "|       3.    Buscar por genero            |" << endl;
+    cout << "|       4.    Buscar por rango de fecha    |" << endl;
+    cout << "|__________________________________________|" << endl;
+
+    int opcion = validarOpcion(1, 4);
+
+    if (opcion == 1 || opcion == 2) {
+        string tipoBusqueda = (opcion == 1) ? "titulo" : "ISBN";
+        cout << " __________________________________________" << endl;
+        cout << "|        1   Busqueda secuencial           |" << endl;
+        cout << "|        2.   Busqueda binaria             |" << endl;
+        cout << "|__________________________________________|" << endl;
+        int opcionMetodo = validarOpcion(1, 2);
+
+        cout << "Ingrese el " << tipoBusqueda << " del libro a buscar: " << endl;
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        string valorBusqueda;
+        std::getline(cin >> std::ws, valorBusqueda);
+
+        auto inicio = std::chrono::high_resolution_clock::now();
+
+        if (opcion == 1) { // Título
+            if (opcionMetodo == 1) {
+                Libro* busqueda = listaLibros.buscarPorTitulo(valorBusqueda);
+                auto fin = std::chrono::high_resolution_clock::now();
+                duracionBusquedaSTitulo = static_cast<int>(
+                    std::chrono::duration<double, std::nano>(fin - inicio).count()
+                );
+                if (busqueda) {
+                    cout << "Libro encontrado:" << endl;
+                    busqueda->imprimirLibro();
+                } else {
+                    cout << "No se encontró el libro con título: " << valorBusqueda << endl;
+                }
+
             } else {
-                cout << "No se encontró el libro con título: " << titulo << endl;
+                NodoAVL* nodo = arbolTitulo.buscarPorTitulo(valorBusqueda);
+                auto fin = std::chrono::high_resolution_clock::now();
+                duracionBusquedaBTitulo = static_cast<int>(
+                    std::chrono::duration<double, std::nano>(fin - inicio).count()
+                );
+                if (nodo) {
+                    cout << "Libro encontrado:" << endl;
+                    nodo->getLibro()->imprimirLibro();
+                } else {
+                    cout << "No se encontró el libro con título: " << valorBusqueda << endl;
+                }
+            }
+        } else { // ISBN
+            if (opcionMetodo == 1) {
+                Libro* busqueda = listaLibros.buscarPorIsbn(valorBusqueda);
+                auto fin = std::chrono::high_resolution_clock::now();
+                duracionBusquedaSISBN = static_cast<int>(
+                    std::chrono::duration<double, std::nano>(fin - inicio).count()
+                );
+                if (busqueda) {
+                    cout << "Libro encontrado:" << endl;
+                    busqueda->imprimirLibro();
+                } else {
+                    cout << "No se encontró el libro con ISBN: " << valorBusqueda << endl;
+                }
+            } else {
+                long long int isbnNum = convertirISBN(valorBusqueda);
+                NodoAVL* nodo = arbolISBN.buscarPorIsbn(isbnNum);
+                auto fin = std::chrono::high_resolution_clock::now();
+                duracionBusquedaBISBN = static_cast<int>(
+                    std::chrono::duration<double, std::nano>(fin - inicio).count()
+                );
+                if (nodo) {
+                    cout << "Libro encontrado:" << endl;
+                    nodo->getLibro()->imprimirLibro();
+                } else {
+                    cout << "No se encontró el libro con ISBN: " << valorBusqueda << endl;
+                }
             }
         }
-    }else if(opcion == 2){
-        int opcion2;
-            cout<<" __________________________________________"<<endl;
-            cout<<"|        1   Busqueda secuencial           |"<<endl;
-            cout<<"|        2.    Busqueda binaria            |"<<endl;
-            cout<<"|__________________________________________|"<<endl;
-        opcion2 = validarOpcion(1, 2);  
-        if (opcion2 == 1) {
-            string isbn;
-            cout << "Ingrese el ISBN del libro a buscar: " << endl;
-            std::getline(cin >> std::ws, isbn); 
-            listaLibros.buscarPorIsbn(isbn);
-        } else if (opcion2 == 2) {
-            string isbn;
-            cout << "Ingrese el ISBN del libro a buscar: " << endl;
-            std::getline(cin >> std::ws, isbn);
-            long long int isbnNum = convertirISBN(isbn);
-            NodoAVL* nodoIsbn = arbolISBN.buscarPorIsbn(isbnNum);
-            if (nodoIsbn != nullptr) {
-                cout << "Libro encontrado:" << endl;
-                nodoIsbn->getLibro()->imprimirLibro();
-            } else {
-                cout << "No se encontró el libro con ISBN: " << isbn << endl;
-            }
-        }
-    } else if(opcion == 3){
+
+    } else if (opcion == 3) {
         buscarArbolB();
-    }else{
+    } else {
         buscarPorRangoAnio();
     }
 }
+
 
 int GestorBiblioteca::validarOpcion(int minimo, int maximo) {
     int opcion;
@@ -319,7 +360,7 @@ void GestorBiblioteca::mostrarLibros(){
     }else if(opcion == 3){
         listaLibros.imprimirLista();
     }else if(opcion == 4){
-        arbolGenero.mostrarlo();
+        arbolGenero.inOrden();
     }else {
         arbolAnio.mostrar();
     }
@@ -337,13 +378,18 @@ void GestorBiblioteca::eliminarLibro() {
         cout << "No se encontró el libro con título: " << titulo << endl;
         return;
     }
-    Libro* libro = nodoTitulo->getLibro(); 
+    if( nodoTitulo->getLibro()->getNumCopias() > 1){
+        nodoTitulo->getLibro()->setNumCopias(nodoTitulo->getLibro()->getNumCopias()-1);
+        cout << "Se ha reducido el número de copias del libro \"" << titulo << "\". Copias restantes: " << nodoTitulo->getLibro()->getNumCopias() << endl;
+        return;
+    }
+    Libro* libro = nodoTitulo->getLibro();
+
     arbolISBN.eliminarIsbn(libro->getISBNNum());
     arbolTitulo.eliminarTitulo(titulo);     
-    arbolGenero.eliminar(libro->getGenero());
+    arbolGenero.eliminar(libro->getGenero(), libro);
     arbolAnio.eliminarPorTitulo(titulo);   
     listaLibros.eliminarLibro(titulo);
-
     cout << "Libro con título \"" << titulo << "\" eliminado correctamente." << endl;
 }
 
@@ -353,8 +399,7 @@ void GestorBiblioteca::generarGraphvizArboles(){
     arbolTitulo.generarGraphviz("arbolTitulo.dot", "arbolTitulo.png");
     arbolGenero.generarGraphviz("arbolGenero.dot", "arbolGenero.png");
     arbolAnio.generarGraphviz("arbolAnio.dot", "arbolAnio.png");
-    cout << "Archivos generados: arbolISBN.dot y arbolTitulo.dot" << endl;
-}
+    cout << "Archivos Graphviz generados correctamente." << endl;}
 
 void GestorBiblioteca::buscarArbolB(){
     cout << "---Hora de buscar un libro por genero en el arbol B---" << endl;
@@ -363,8 +408,8 @@ void GestorBiblioteca::buscarArbolB(){
     std::getline(cin >> std::ws, genero); 
 
     ListaLibro encontrados;
-    Libro* primerEncontrado = arbolGenero.buscar(genero, encontrados);
-    if (primerEncontrado == nullptr) {
+    arbolGenero.buscar(genero, encontrados);
+    if (encontrados.estaVacia()) {
         cout << "No se encontraron libros con el género: " << genero << endl;
         return;
     }
@@ -388,4 +433,46 @@ void GestorBiblioteca::buscarPorRangoAnio(){
     }
     cout << "Libros encontrados del año " << anioInicial << " al año " << anioFinal << ":" << endl;
     encontrados.imprimirLista();
+}
+
+void GestorBiblioteca::compararTiempos(){
+    cout << "---Comparando tiempos de busqueda---" << endl;
+    cout << "Tiempo de busqueda secuencial por titulo: " << duracionBusquedaSTitulo << " ms" << endl;
+    cout << "Tiempo de busqueda binaria por titulo: " << duracionBusquedaBTitulo << " ms" << endl;
+    cout << "Tiempo de busqueda secuencial por ISBN: " << duracionBusquedaSISBN << " ms" << endl;
+    cout << "Tiempo de busqueda binaria por ISBN: " << duracionBusquedaBISBN << " ms" << endl;
+}
+
+void GestorBiblioteca::cargarLibroManual(){
+    cout << "---Hora de cargar un libro manualmente---" << endl;
+    string titulo, isbn, genero, autor;
+    int anio;
+    do{
+        cout << "Ingrese el título del libro: ";
+        std::getline(cin >> std::ws, titulo);
+        cout << "Ingrese el ISBN del libro (formato 13 digitos): ";
+        std::getline(cin >> std::ws, isbn);
+        cout << "Ingrese el género del libro: ";
+        std::getline(cin >> std::ws, genero);
+        cout << "Ingrese el año de publicación del libro: ";
+        cin >> anio;
+        if(cin.fail()){
+            cin.clear(); 
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+            anio = -1;
+        }
+        cout << "Ingrese el autor del libro: ";
+        std::getline(cin >> std::ws, autor);
+    }while(!validarISBN(isbn) || titulo.empty() || genero.empty() || autor.empty() || anio <= 0);
+
+    Libro* nuevoLibro = new Libro();
+    nuevoLibro->setTitulo(titulo);
+    nuevoLibro->setISBN(isbn);
+    nuevoLibro->setISBNNum(convertirISBN(isbn));
+    nuevoLibro->setGenero(genero);
+    nuevoLibro->setAnio(anio);
+    nuevoLibro->setAutor(autor);
+    nuevoLibro->setNumCopias(1); 
+    cargarLibros(nuevoLibro);
+    cout << "Libro cargado exitosamente." << endl;
 }

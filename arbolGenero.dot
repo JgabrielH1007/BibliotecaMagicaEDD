@@ -1,10 +1,10 @@
 digraph G {
-  node [shape=record];
-  node0 [label="El Principito\nFábula | Crimen y Castigo\nNovela Psicológica"];
-  node1 [label="Moby Dick\nAventura | Fahrenheit 451\nDistopía | Los Miserables\nDrama Histórico"];
-  node0 -> node1;
-  node2 [label="Ulises\nModernismo | En Busca del Tiempo Perdido\nModernismo"];
-  node0 -> node2;
-  node3 [label="La Odisea\nÉpica | La Iliada\nÉpica"];
-  node0 -> node3;
+node [shape=record];
+node0x5661f3224180 [label="Fábula | Romántica"];
+node0x5661f3224180 -> node0x5661f3223f50;
+node0x5661f3223f50 [label="Distopía | Drama Histórico"];
+node0x5661f3224180 -> node0x5661f3224b50;
+node0x5661f3224b50 [label="Modernismo | Modernismo | Novela Psicológica"];
+node0x5661f3224180 -> node0x5661f3224a90;
+node0x5661f3224a90 [label="Épica | Épica"];
 }

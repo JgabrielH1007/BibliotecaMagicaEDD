@@ -51,8 +51,6 @@ void ListaLibro::eliminarLibro(string titulo) {
     delete actual->libro;
     delete actual;
     tamanio--;
-
-    cout << "Libro con ISBN " << titulo << " eliminado correctamente." << endl;
 }
 
 void ListaLibro::imprimirLista() {

@@ -4,26 +4,20 @@
 #include "Libro.h"
 #include "ListaLibro.h"
 #include <iostream>
+#include <list>
 using namespace std;
 
 class ArbolB {
-    private:
-        NodoB* raiz;
-        int t;
-        void dividirHijo(NodoB* padre, int indice, NodoB* hijo);
-        void insertarNoLleno(NodoB* nodo, Libro* libro);
-        void eliminar(NodoB* nodo, string genero);
-        int encontrarIndice(string genero);
-        void mostrar(NodoB* nodo, int nivel = 0);
-        void generarGraphvizRecursivo(NodoB* nodo, ofstream& archivo, int& contador);
-        void buscarPorGenero(NodoB* nodo, const std::string& genero, ListaLibro& lista, Libro*& primerEncontrado);
     public:
-        ArbolB(int t);
+        nodoB* raiz;
+        int grado;
+        ArbolB(int _grado);
+        void buscar(string genero, ListaLibro &resultados);
         void insertar(Libro* libro);
-        void eliminar(string genero);
-        Libro* buscar(string genero, ListaLibro& lista);
-        void mostrarlo();
-        void generarGraphviz(const string& nombreArchivo, const string& nombreImagen);
+        void eliminar(string genero, Libro* libroEspecifico);
+        void inOrden();
+        void generarGraphvizRec(nodoB* nodo, ofstream &archivo);
+        void generarGraphviz(const string &nombreArchivoDot, const string &nombreArchivoImagen);
     };
     
 

@@ -13,7 +13,15 @@ class Libro{
         string genero="";
         int anio = 0;
         string autor ="";
+        int numCopias = 1;
     public:
+
+        void setNumCopias(int numCopias){
+            this->numCopias = numCopias;
+        }
+        int getNumCopias(){
+            return numCopias;
+        }
         void setTitulo(string titulo){
             this->titulo = titulo;
         }

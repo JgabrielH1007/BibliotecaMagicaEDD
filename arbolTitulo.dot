@@ -9,12 +9,12 @@ digraph G {
     "Fahrenheit 451" [label="Fahrenheit 451\nISBN: 978-84-9759-425-8"];
     "Fahrenheit 451" -> "En Busca del Tiempo Perdido";
     "En Busca del Tiempo Perdido" [label="En Busca del Tiempo Perdido\nISBN: 978-84-206-6942-7"];
-    "La Iliada" -> "Moby Dick";
-    "Moby Dick" [label="Moby Dick\nISBN: 978-84-9105-088-0"];
-    "Moby Dick" -> "La Odisea";
+    "La Iliada" -> "Orgullo y Prejuicio";
+    "Orgullo y Prejuicio" [label="Orgullo y Prejuicio\nISBN: 978-84-9105-029-3"];
+    "Orgullo y Prejuicio" -> "La Odisea";
     "La Odisea" [label="La Odisea\nISBN: 978-84-08-00001-1"];
     "La Odisea" -> "Los Miserables";
     "Los Miserables" [label="Los Miserables\nISBN: 978-84-9105-021-7"];
-    "Moby Dick" -> "Ulises";
+    "Orgullo y Prejuicio" -> "Ulises";
     "Ulises" [label="Ulises\nISBN: 978-84-9181-125-2"];
 }

@@ -1,7 +1,7 @@
 digraph G {
   node [shape=record];
   node0 [label="1866", shape=record];
-  node1 [label="-800 (1) | -750 (1) | 1851 (1) | 1862 (1)", shape=record];
+  node1 [label="-800 (1) | -750 (1) | 1813 (1) | 1862 (1)", shape=record];
   node2 [label="1866 (1) | 1913 (1) | 1922 (1) | 1943 (1) | 1953 (1)", shape=record];
   node1 -> node2 [style=dashed, constraint=false];
   node0 -> node1;

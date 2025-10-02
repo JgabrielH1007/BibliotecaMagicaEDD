@@ -9,6 +9,10 @@
 
 class GestorBiblioteca{
     private:
+        int duracionBusquedaBISBN = 0;
+        int duracionBusquedaBTitulo = 0;
+        int duracionBusquedaSISBN = 0;
+        int duracionBusquedaSTitulo = 0;
         ListaLibro listaLibros;
         ArbolAVL arbolISBN;
         ArbolAVL arbolTitulo;

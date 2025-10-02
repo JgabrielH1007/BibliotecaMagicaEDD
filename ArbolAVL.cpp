@@ -327,13 +327,9 @@ void ArbolAVL::generarGraphviz(const string& nombreArchivoDOT, const string& nom
         archivo << "}" << endl;
         archivo.close();
 
-        cout << "Archivo DOT generado: " << nombreArchivoDOT << endl;
-
-        // Comando para generar la imagen (PNG)
         string comando = "dot -Tpng " + nombreArchivoDOT + " -o " + nombreImagen;
         int resultado = system(comando.c_str());
         if (resultado == 0) {
-            cout << "Imagen generada correctamente: " << nombreImagen << endl;
         } else {
             cout << "Error al generar la imagen con Graphviz." << endl;
         }
@@ -341,3 +337,4 @@ void ArbolAVL::generarGraphviz(const string& nombreArchivoDOT, const string& nom
         cout << "No se pudo abrir el archivo DOT para escribir." << endl;
     }
 }
+

@@ -205,7 +205,9 @@ void ArbolBPlus::encontrarPadreYPos(NodoBPlus* raiz, NodoBPlus* hijo, NodoBPlus*
         return; 
     }
 
-    for (size_t i = 0; i < raiz->claves.size() + 1; i++) {
+    if (!raiz || raiz == hijo || raiz->hijos.empty()) return;
+
+    for (size_t i = 0; i < raiz->claves.size(); i++) {
         if (raiz->hijos[i] == hijo) {
             pp = raiz;  
             idx = i;     
@@ -213,7 +215,7 @@ void ArbolBPlus::encontrarPadreYPos(NodoBPlus* raiz, NodoBPlus* hijo, NodoBPlus*
         }
     }
 
-    for (size_t i = 0; i < raiz->claves.size() + 1; i++) {
+    for (size_t i = 0; i < raiz->claves.size(); i++) {
         if (raiz->hijos[i] != nullptr) {
             encontrarPadreYPos(raiz->hijos[i], hijo, pp, idx);
             if (pp != nullptr) {
@@ -555,7 +557,6 @@ void ArbolBPlus::eliminarPorTitulo(const string& titulo) {
         raiz = nuevo;
     }
 
-    cout << "Eliminados " << eliminadosTotales << " libros con el título \"" << titulo << "\". Árbol re-balanceado.\n";
 }
 
 Libro* ArbolBPlus::buscarPorRangoAnio(int anioInicial, int anioFinal, ListaLibro& lista) const {
