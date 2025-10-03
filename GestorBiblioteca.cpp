@@ -31,9 +31,10 @@ void GestorBiblioteca::menuBiblioteca(){
     cout<<"|      5.        Listar libros             |"<<endl;
     cout<<"|      6. Comparar tiempo de busquedas     |"<<endl;
     cout<<"|      7. Visulizar arboles utilizados     |"<<endl;
-    cout<<"|      8.            Salir                 |"<<endl;
+    cout<<"|      8.       Limpiar terminal           |"<<endl;
+    cout<<"|      9.            Salir                 |"<<endl;
     cout<<"|__________________________________________|"<<endl;
-    opcion = validarOpcion(1,8);
+    opcion = validarOpcion(1,9);
     realizarAccion(opcion);
 }
 
@@ -83,6 +84,11 @@ void GestorBiblioteca::realizarAccion(int& opcion){
             menuFinAccion();
             break;
         case 8:
+            system("clear||cls");
+            menuBiblioteca();
+            break;
+        case 9:
+            cout << "¡Gracias por usar la Biblioteca Mágica! ¡Hasta luego!" << endl;
             break;
     }
 }
@@ -362,7 +368,7 @@ void GestorBiblioteca::mostrarLibros(){
     }else if(opcion == 4){
         arbolGenero.inOrden();
     }else {
-        arbolAnio.mostrar();
+        arbolAnio.imprimirArbol();
     }
 }
 
@@ -395,10 +401,10 @@ void GestorBiblioteca::eliminarLibro() {
 
 void GestorBiblioteca::generarGraphvizArboles(){
     cout << "---Generando archivos Graphviz de los árboles AVL---" << endl;
-    arbolISBN.generarGraphviz("arbolISBN.dot", "arbolISBN.png");
-    arbolTitulo.generarGraphviz("arbolTitulo.dot", "arbolTitulo.png");
-    arbolGenero.generarGraphviz("arbolGenero.dot", "arbolGenero.png");
-    arbolAnio.generarGraphviz("arbolAnio.dot", "arbolAnio.png");
+    arbolISBN.generarGraphviz("arbolISBN.dot", "arbolISBN.svg");
+    arbolTitulo.generarGraphviz("arbolTitulo.dot", "arbolTitulo.svg");
+    arbolGenero.generarGraphviz("arbolGenero.dot", "arbolGenero.svg");
+    arbolAnio.generarGraphviz("arbolAnio.dot", "arbolAnio.svg");
     cout << "Archivos Graphviz generados correctamente." << endl;}
 
 void GestorBiblioteca::buscarArbolB(){
@@ -426,21 +432,17 @@ void GestorBiblioteca::buscarPorRangoAnio(){
     cin >> anioFinal;
 
     ListaLibro encontrados;
-    Libro* primerEncontrado = arbolAnio.buscarPorRangoAnio(anioInicial, anioFinal, encontrados);
-    if (primerEncontrado == nullptr) {
-        cout << "No se encontraron libros del año: " << anioInicial<<" al año final: "<<anioFinal << endl;
-        return;
-    }
+    arbolAnio.buscar(anioInicial, anioFinal, encontrados);
     cout << "Libros encontrados del año " << anioInicial << " al año " << anioFinal << ":" << endl;
     encontrados.imprimirLista();
 }
 
 void GestorBiblioteca::compararTiempos(){
     cout << "---Comparando tiempos de busqueda---" << endl;
-    cout << "Tiempo de busqueda secuencial por titulo: " << duracionBusquedaSTitulo << " ms" << endl;
-    cout << "Tiempo de busqueda binaria por titulo: " << duracionBusquedaBTitulo << " ms" << endl;
-    cout << "Tiempo de busqueda secuencial por ISBN: " << duracionBusquedaSISBN << " ms" << endl;
-    cout << "Tiempo de busqueda binaria por ISBN: " << duracionBusquedaBISBN << " ms" << endl;
+    cout << "Tiempo de busqueda secuencial por titulo: " << duracionBusquedaSTitulo << " ns" << endl;
+    cout << "Tiempo de busqueda binaria por titulo: " << duracionBusquedaBTitulo << " ns" << endl;
+    cout << "Tiempo de busqueda secuencial por ISBN: " << duracionBusquedaSISBN << " ns" << endl;
+    cout << "Tiempo de busqueda binaria por ISBN: " << duracionBusquedaBISBN << " ns" << endl;
 }
 
 void GestorBiblioteca::cargarLibroManual(){

@@ -8,9 +8,10 @@
 using namespace std;
 
 class ArbolB {
-    public:
+    private:
         nodoB* raiz;
         int grado;
+    public:
         ArbolB(int _grado);
         void buscar(string genero, ListaLibro &resultados);
         void insertar(Libro* libro);

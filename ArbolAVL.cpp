@@ -327,7 +327,7 @@ void ArbolAVL::generarGraphviz(const string& nombreArchivoDOT, const string& nom
         archivo << "}" << endl;
         archivo.close();
 
-        string comando = "dot -Tpng " + nombreArchivoDOT + " -o " + nombreImagen;
+        string comando = "dot -Tsvg " + nombreArchivoDOT + " -o " + nombreImagen;
         int resultado = system(comando.c_str());
         if (resultado == 0) {
         } else {

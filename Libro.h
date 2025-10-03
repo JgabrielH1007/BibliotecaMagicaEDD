@@ -67,6 +67,7 @@ class Libro{
              << " | Género: " << genero<<"\n"
              << " | Año: " << anio<<"\n"
              << " | Autor: " << autor<<"\n"
+             << " | Número de copias: " << numCopias
              << endl;
         }
         

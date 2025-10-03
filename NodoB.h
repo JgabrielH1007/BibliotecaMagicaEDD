@@ -77,10 +77,13 @@ class nodoB {
 
 
         int encontrarLlave(const string &genero) {
-            int idx = 0;
-            while (idx < (int)llaves.size() && llaves[idx]->getGenero().compare(genero) < 0) ++idx;
-            return idx;
-        } 
+            for (int i = 0; i < (int)llaves.size(); i++) {
+                if (llaves[i]->getGenero() == genero)
+                    return i; // posición exacta
+            }
+            return -1; 
+        }
+        
         
         void fusionar(int idx) {
             nodoB* hijo = hijos[idx];
@@ -188,32 +191,32 @@ class nodoB {
 
         void eliminar(const string &genero, Libro* libroEspecifico = nullptr) {
             int index = encontrarLlave(genero);
-        
-            while (index < (int)llaves.size() && llaves[index]->getGenero() == genero) {
-                if (libroEspecifico == nullptr || llaves[index] == libroEspecifico) {
-                    if (esHoja)
-                        eliminarDeHoja(index);
-                    else
-                        eliminarDeNoHoja(index);
-                    return;
+                if (index != -1) {
+                    while (index < (int)llaves.size() && llaves[index]->getGenero() == genero) {
+                        if (libroEspecifico == nullptr || llaves[index]->getISBN() == libroEspecifico->getISBN()) {
+                            if (esHoja)
+                                eliminarDeHoja(index);
+                            else
+                                eliminarDeNoHoja(index);
+                            return;
+                        }
+                        ++index;
+                    }
+                } else {
+                    if (esHoja) {
+                        cout << "La clave (género '" << genero << "') no existe en el árbol.\n";
+                        return;
+                    }
+                    int indiceHijo = 0;
+                    while (indiceHijo < (int)llaves.size() && llaves[indiceHijo]->getGenero() < genero)
+                        ++indiceHijo;
+
+                    if ((int)hijos[indiceHijo]->llaves.size() < grado)
+                        llenar(indiceHijo);
+
+                    hijos[indiceHijo]->eliminar(genero, libroEspecifico);
                 }
-                ++index;
-            }
-        
-            if (esHoja) {
-                cout << "La clave (género '" << genero << "') no existe en el árbol.\n";
-                return;
-            }
-        
-            bool flag = (index == (int)llaves.size());
-        
-            if ((int)hijos[index]->llaves.size() < grado)
-                llenar(index);
-        
-            if (flag && index > (int)llaves.size())
-                hijos[index - 1]->eliminar(genero, libroEspecifico);
-            else
-                hijos[index]->eliminar(genero, libroEspecifico);
+
         }
         
         

@@ -8,7 +8,7 @@ using namespace std;
 class NodoBPlus {
     public:
         bool esHoja;
-        vector<int> claves;
+        vector<int> llaves;
         vector<NodoBPlus*> hijos;
         vector<vector<Libro*>> registros; 
         NodoBPlus* siguiente; 

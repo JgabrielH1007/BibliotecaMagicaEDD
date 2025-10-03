@@ -1,32 +1,50 @@
 #ifndef ARBOLBPLUS_H
 #define ARBOLBPLUS_H
-#include <vector>
+
 #include "Libro.h"
-#include <string>
 #include "ListaLibro.h"
-#include "NodoB+.h"
-#include <unordered_map>
-using namespace std;
+#include <vector>
+#include <string>
+#include <queue>
+#include <optional>
 
 class ArbolBPlus {
-    private:
-        NodoBPlus* raiz;
-        int t; 
-        void dividirHijo(NodoBPlus* padre, int indice);
-        void dividirHoja(NodoBPlus* hoja);
-        void insertarEnHoja(NodoBPlus* hoja, Libro* libro);
-        NodoBPlus* buscarHoja(int anio) const;
-        void generarGraphvizRecursivo(NodoBPlus* nodo, ofstream& archivo, int& contador, unordered_map<NodoBPlus*, int>& idMap);
-        void encontrarPadreYPos(NodoBPlus* raiz, NodoBPlus* h, NodoBPlus*& parent, int& index);
-        void clavesPromotorasRec(NodoBPlus* nodo);
-    public:
-        ArbolBPlus(int t);
-        void insertar(Libro* libro);
-        Libro* buscarPorRangoAnio(int anioInicial, int anioFinal, ListaLibro& lista) const;
-        void mostrar();
-        void generarGraphviz(const string& nombreArchivo, const string& nombreImagen);
-        void eliminarPorTitulo(const string& titulo);
-        void rebalancearInterno(NodoBPlus* nodo);
-        void rebalancearHoja(NodoBPlus* hoja);
+public:
+    explicit ArbolBPlus(int orden = 4);
+    ~ArbolBPlus();
+    void insertar(Libro* libro);
+    void buscar(int anioInicial, int anioFinal, ListaLibro &resultados) const;
+    bool eliminarPorTitulo(const std::string &titulo);
+    void imprimirArbol() const;
+    void imprimirHojas() const;
+    void generarGraphviz(const std::string &nombreArchivoDot, const std::string &nombreArchivoImagen);
+
+private:
+    struct Nodo {
+        bool esHoja;
+        std::vector<int> keys;                       // claves (años)
+        std::vector<std::vector<Libro*>> records;    // solo hojas: records[i] son libros con keys[i]
+        std::vector<Nodo*> children;                 // solo internos
+        Nodo* next;                                  // enlace entre hojas
+
+        explicit Nodo(bool hoja) : esHoja(hoja), next(nullptr) {}
+        ~Nodo() {}
     };
- #endif
+
+    Nodo* raiz;
+    int orden;
+    int maxKeys;
+    int minKeys;
+
+    void borrarSubArbol(Nodo* nodo);
+    Nodo* encontrarHoja(Nodo* nodo, int key) const;
+    std::pair<Nodo*, int> dividirHoja(Nodo* hoja);
+    std::pair<Nodo*, int> dividirInterno(Nodo* node);
+    void insertarEnHoja(Nodo* hoja, Libro* libro);
+    void insertarRecursivo(Nodo* node, int key, Libro* libro, int &promoKey, Nodo* &promoNode, bool &splitHappened);
+    void recolectarRangoDesdeHoja(Nodo* hoja, int anioInicial, int anioFinal, ListaLibro &resultados) const;
+    bool eliminarEnHojasPorTitulo(Nodo* node, const std::string &titulo);
+    void generarGraphvizRec(Nodo* nodo, std::ofstream &archivo);
+};
+
+#endif

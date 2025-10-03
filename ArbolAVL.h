@@ -9,8 +9,6 @@ using namespace std;
 class ArbolAVL{
     private:
         NodoAVL* raiz;
-        int segundosBusquedaT = 0;
-        int segundosBusquedaI = 0;
         NodoAVL* rotacionDD(NodoAVL* nodo);
         NodoAVL* rotacionII(NodoAVL* nodo);
         NodoAVL* rotacionDI(NodoAVL* nodo);
