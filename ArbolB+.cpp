@@ -11,17 +11,6 @@ ArbolBPlus::ArbolBPlus(int orden_) : raiz(nullptr), orden(orden_) {
     minKeys = (orden + 1) / 2 - 1;
 }
 
-ArbolBPlus::~ArbolBPlus() {
-    borrarSubArbol(raiz);
-}
-
-void ArbolBPlus::borrarSubArbol(Nodo* nodo) {
-    if (!nodo) return;
-    if (!nodo->esHoja) {
-        for (Nodo* ch : nodo->children) borrarSubArbol(ch);
-    }
-    delete nodo;
-}
 
 ArbolBPlus::Nodo* ArbolBPlus::encontrarHoja(Nodo* nodo, int key) const {
     if (!nodo) return nullptr;
@@ -103,7 +92,6 @@ void ArbolBPlus::insertarRecursivo(Nodo* node, int key, Libro* libro, int &promo
         return;
     }
 
-    // insertar promoted key y nuevo hijo en este interno
     auto it = lower_bound(node->keys.begin(), node->keys.end(), childPromoKey);
     int pos = int(it - node->keys.begin());
     node->keys.insert(node->keys.begin() + pos, childPromoKey);
@@ -176,7 +164,6 @@ void ArbolBPlus::buscar(int anioInicial, int anioFinal, ListaLibro &resultados) 
 
 bool ArbolBPlus::eliminarPorTitulo(const string &titulo) {
     if (!raiz) return false;
-    // iterar hojas y eliminar la primera coincidencia por título
     Nodo* cur = raiz;
     while (!cur->esHoja) cur = cur->children.front();
     while (cur) {
@@ -185,7 +172,6 @@ bool ArbolBPlus::eliminarPorTitulo(const string &titulo) {
             for (auto it = vec.begin(); it != vec.end(); ++it) {
                 if ((*it)->getTitulo() == titulo) {
                     vec.erase(it);
-                    // si vector de registros queda vacío, quitar la clave y el registro
                     if (vec.empty()) {
                         cur->records.erase(cur->records.begin() + int(i));
                         cur->keys.erase(cur->keys.begin() + int(i));

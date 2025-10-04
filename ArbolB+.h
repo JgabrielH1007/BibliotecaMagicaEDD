@@ -11,7 +11,6 @@
 class ArbolBPlus {
 public:
     explicit ArbolBPlus(int orden = 4);
-    ~ArbolBPlus();
     void insertar(Libro* libro);
     void buscar(int anioInicial, int anioFinal, ListaLibro &resultados) const;
     bool eliminarPorTitulo(const std::string &titulo);
